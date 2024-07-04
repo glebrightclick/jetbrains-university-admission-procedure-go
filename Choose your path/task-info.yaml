@@ -9,7 +9,13 @@ files:
   - name: tests.py
     visible: false
     learner_created: false
+  - name: applicants.txt
+    visible: true
+    learner_created: true
 feedback_link: https://hyperskill.org/learn/step/21376#comment
 check_profile: hyperskill_go
-status: Unchecked
+status: Solved
+feedback:
+  message: <html>Correct solution</html>
+  time: "Thu, 04 Jul 2024 11:04:52 UTC"
 record: -1

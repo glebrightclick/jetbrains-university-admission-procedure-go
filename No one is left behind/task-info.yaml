@@ -1,0 +1,16 @@
+type: remote_edu
+custom_name: No one is left behind!
+files:
+  - name: main.go
+    visible: true
+    learner_created: false
+  - name: tests.py
+    visible: false
+    learner_created: false
+feedback_link: https://hyperskill.org/learn/step/21373#comment
+check_profile: hyperskill_go
+status: Solved
+feedback:
+  message: <html>Correct solution</html>
+  time: "Mon, 01 Jul 2024 11:52:22 UTC"
+record: 1

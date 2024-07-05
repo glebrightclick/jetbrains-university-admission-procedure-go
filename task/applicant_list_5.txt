@@ -1,4 +1,4 @@
-application_list = """Jermine Brunton 84 81 73 92 Physics Engineering Mathematics
+Jermine Brunton 84 81 73 92 Physics Engineering Mathematics
 Justo Mirfin 71 77 61 60 Engineering Biotech Chemistry
 Uzma Naysmythe 60 94 75 71 Chemistry Engineering Mathematics
 Koury Wingo 71 81 81 83 Engineering Biotech Mathematics
@@ -95,4 +95,4 @@ Tamkia Fish 81 71 73 86 Physics Engineering Mathematics
 Deniz Blanchard 71 77 61 60 Engineering Biotech Chemistry
 Mira Riley 60 94 75 71 Chemistry Biotech Mathematics
 Loura Macansh 71 81 81 93 Engineering Physics Mathematics
-Nastassja Trustram 60 49 82 68 Mathematics Engineering Physics"""
+Nastassja Trustram 60 49 82 68 Mathematics Engineering Physics

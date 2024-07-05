@@ -10,8 +10,16 @@ import (
 	"strings"
 )
 
+type DepartmentName string
+
+const mathematics DepartmentName = "Mathematics"
+const physics DepartmentName = "Physics"
+const biotech DepartmentName = "Biotech"
+const chemistry DepartmentName = "Chemistry"
+const engineering DepartmentName = "Engineering"
+
 type Department struct {
-	name       string
+	name       DepartmentName
 	applicants []*Applicant
 	waves      [][]*Applicant
 }
@@ -19,6 +27,7 @@ type Department struct {
 type Applicant struct {
 	firstName, lastName string
 	GPA                 float64
+	scores              map[DepartmentName]float64
 	department          *Department
 }
 
@@ -32,34 +41,47 @@ func main() {
 	fmt.Scan(&maxStudentsInDepartment)
 	// Read the file named applicants.txt (this file is already included in the project's files, even though it is not visible; so you only need to download it if you want to take a closer look at it).
 	file, err := os.Open("applicants.txt")
+	// file, err := os.Open("/Users/divine/code/jetbrains/University Admission Procedure (Go)/University Admission Procedure (Go)/task/applicant_list_5.txt")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	departments := map[string]Department{
-		"Mathematics": {"Mathematics", make([]*Applicant, maxStudentsInDepartment), make([][]*Applicant, 3)},
-		"Physics":     {"Physics", make([]*Applicant, maxStudentsInDepartment), make([][]*Applicant, 3)},
-		"Biotech":     {"Biotech", make([]*Applicant, maxStudentsInDepartment), make([][]*Applicant, 3)},
-		"Chemistry":   {"Chemistry", make([]*Applicant, maxStudentsInDepartment), make([][]*Applicant, 3)},
-		"Engineering": {"Engineering", make([]*Applicant, maxStudentsInDepartment), make([][]*Applicant, 3)},
+	departments := map[DepartmentName]Department{
+		mathematics: {mathematics, make([]*Applicant, maxStudentsInDepartment), make([][]*Applicant, 3)},
+		physics:     {physics, make([]*Applicant, maxStudentsInDepartment), make([][]*Applicant, 3)},
+		biotech:     {biotech, make([]*Applicant, maxStudentsInDepartment), make([][]*Applicant, 3)},
+		chemistry:   {chemistry, make([]*Applicant, maxStudentsInDepartment), make([][]*Applicant, 3)},
+		engineering: {engineering, make([]*Applicant, maxStudentsInDepartment), make([][]*Applicant, 3)},
 	}
 	// Each line equals one applicant, their first name, last name, GPA, first priority department, second priority department, and third priority department.
 	// Columns with values are separated by whitespace characters. For example, Laura Spungen 3.71 Physics Engineering Mathematics.
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		info := strings.Split(scanner.Text(), " ")
-		GPA, err1 := strconv.ParseFloat(info[2], 64)
-		if err1 != nil {
-			fmt.Println("Error parsing GPA", info)
-			continue
+		// physics, chemistry, math, computer science
+		firstName, lastName := info[0], info[1]
+
+		scoreIndex := map[int][]DepartmentName{4: {mathematics}, 2: {physics}, 3: {biotech, chemistry}, 5: {engineering}}
+		scores := make(map[DepartmentName]float64)
+		for i := 2; i < 6; i++ {
+			score, err := strconv.ParseFloat(info[i], 64)
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			for _, departmentName := range scoreIndex[i] {
+				scores[departmentName] = score
+			}
 		}
+
 		applicant := Applicant{
-			info[0],
-			info[1],
-			GPA,
+			firstName,
+			lastName,
+			0.0,
+			scores,
 			nil,
 		}
-		d1, d2, d3 := departments[info[3]], departments[info[4]], departments[info[5]]
+		d1, d2, d3 := departments[DepartmentName(info[6])], departments[DepartmentName(info[7])], departments[DepartmentName(info[8])]
 		d1.waves[0] = append(d1.waves[0], &applicant)
 		d2.waves[1] = append(d2.waves[1], &applicant)
 		d3.waves[2] = append(d3.waves[2], &applicant)
@@ -68,7 +90,7 @@ func main() {
 	// Sort applicants according to their GPA and priorities (and names, if their GPA scores are the same).
 	// As in the previous stage, if two applicants to the same department have the same GPA, sort them by their full names in alphabetical order.
 
-	sortApplicants := func(applicants []*Applicant) {
+	sortApplicants := func(applicants []*Applicant, departmentName DepartmentName) {
 		sort.Slice(applicants, func(i, j int) bool {
 			if applicants[i] == nil {
 				return false
@@ -76,18 +98,20 @@ func main() {
 				return true
 			}
 
-			if applicants[i].GPA == applicants[j].GPA {
+			iScore, jScore := applicants[i].scores[departmentName], applicants[j].scores[departmentName]
+
+			if iScore == jScore {
 				return applicants[i].fullName() < applicants[j].fullName()
 			}
 
-			return applicants[i].GPA > applicants[j].GPA
+			return iScore > jScore
 		})
 	}
 
 	// first of all, let's try to sort out first wave, then second, then third
 	distribute := func(department *Department, waveNumber int) {
 		// sort applicants by GPA + fullName
-		sortApplicants(department.waves[waveNumber])
+		sortApplicants(department.waves[waveNumber], department.name)
 
 		index, capacity := 0, len(department.applicants)
 		for _, applicant := range department.applicants {
@@ -124,11 +148,14 @@ func main() {
 	}
 
 	// Print the departments in the alphabetic order (Biotech, Chemistry, Engineering, Mathematics, Physics), output the names and the GPA of enrolled applicants for each department.
-	var departmentNames []string
+	var departmentNames []DepartmentName
 	for departmentName := range departments {
 		departmentNames = append(departmentNames, departmentName)
 	}
-	sort.Strings(departmentNames)
+	sort.Slice(departmentNames, func(i, j int) bool {
+		return departmentNames[i] < departmentNames[j]
+	})
+
 	// Some departments are less popular than others, so there may be fewer available candidates for a department.
 	// However, their number shouldn't be more than N.
 	// Separate the name and the GPA with a whitespace character. Here's an example (you may add empty lines between the departments' lists to increase the text readability):
@@ -137,7 +164,7 @@ func main() {
 		// department_name
 		fmt.Println(department.name)
 		// sort applicants by GPA & names
-		sortApplicants(department.applicants)
+		sortApplicants(department.applicants, departmentName)
 		for _, applicant := range department.applicants {
 			if applicant == nil {
 				break
@@ -147,7 +174,7 @@ func main() {
 			// applicant2 GPA2
 			// applicant3 GPA3
 			// <...>
-			fmt.Printf("%s %.2f\n", applicant.fullName(), applicant.GPA)
+			fmt.Printf("%s %.2f\n", applicant.fullName(), applicant.scores[department.name])
 		}
 		fmt.Println()
 	}

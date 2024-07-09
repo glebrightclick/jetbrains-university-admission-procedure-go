@@ -15,10 +15,23 @@ files:
   - name: applicant_list_5.txt
     visible: true
     learner_created: true
+  - name: applicant_list_7.txt
+    visible: true
+    learner_created: true
 feedback_link: https://hyperskill.org/learn/step/21378#comment
 check_profile: hyperskill_go
-status: Solved
+status: Failed
 feedback:
-  message: <html>Correct solution</html>
-  time: "Tue, 09 Jul 2024 10:44:18 UTC"
-record: -1
+  message: |-
+    Exception in test #1
+
+    2024/07/09 11:35:01 strconv.ParseFloat: parsing "Physics": invalid syntax
+
+    Please find below the output of your program during this failed test.
+    Note that the '>' character indicates the beginning of the input line.
+
+    ---
+
+    > 5
+  time: "Tue, 09 Jul 2024 11:35:05 UTC"
+record: 6

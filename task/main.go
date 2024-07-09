@@ -31,18 +31,19 @@ func (d *Department) String() string {
 
 type Applicant struct {
 	firstName, lastName string
-	GPA                 float64
+	specialScore        float64
 	scores              map[DepartmentName]float64
 	department          *Department
 }
 
 func (applicant *Applicant) Score(department *Department) float64 {
+	// Choose the best score for a student in the ranking: either the mean score for the final exam(s) or the special exam's score.
 	total := 0.0
 	for _, applyDepartmentName := range department.applyScores {
 		total += applicant.scores[applyDepartmentName]
 	}
 
-	return total / float64(len(department.applyScores))
+	return max(total/float64(len(department.applyScores)), applicant.specialScore)
 }
 
 func (applicant *Applicant) fullName() string {
@@ -55,7 +56,7 @@ func main() {
 	fmt.Scan(&maxStudentsInDepartment)
 	// Read the file named applicants.txt (this file is already included in the project's files, even though it is not visible; so you only need to download it if you want to take a closer look at it).
 	file, err := os.Open("applicants.txt")
-	// file, err := os.Open("/Users/divine/code/jetbrains/University Admission Procedure (Go)/University Admission Procedure (Go)/task/applicant_list_5.txt")
+	// file, err := os.Open("/Users/divine/code/jetbrains/University Admission Procedure (Go)/University Admission Procedure (Go)/task/applicant_list_7.txt")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -118,14 +119,23 @@ func main() {
 			}
 		}
 
+		// Read the file named applicants.txt once again.
+		// Mind one additional column, right after the last exam's result.
+		// This column represents the special exam's score.
+		// For example, Willie McBride 76 45 79 80 100 Physics Engineering Mathematics(where 100 is the admission exam's score).
+		specialScore, err := strconv.ParseFloat(info[6], 64)
+		if err != nil {
+			log.Fatal(err)
+		}
+
 		applicant := Applicant{
 			firstName,
 			lastName,
-			0.0,
+			specialScore,
 			scores,
 			nil,
 		}
-		d1, d2, d3 := departments[DepartmentName(info[6])], departments[DepartmentName(info[7])], departments[DepartmentName(info[8])]
+		d1, d2, d3 := departments[DepartmentName(info[7])], departments[DepartmentName(info[8])], departments[DepartmentName(info[9])]
 		d1.waves[0] = append(d1.waves[0], &applicant)
 		d2.waves[1] = append(d2.waves[1], &applicant)
 		d3.waves[2] = append(d3.waves[2], &applicant)

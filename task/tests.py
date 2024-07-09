@@ -29,8 +29,14 @@ class TestAdmissionProcedure(StageTest):
             if len(dep_list) == max_students:
                 continue
             students_needed = max_students - len(dep_list)
-            dep_applicants = [[applicant[0]] + [mean([applicant[exam_n + 1] for exam_n in exam_numbers])]
-                              for applicant in applicants if applicant[-1][priority_n] == dep]
+            dep_applicants = []
+            for applicant in applicants:
+                if applicant[-1][priority_n] != dep:
+                    continue
+                mean_exam_score = mean([applicant[exam_n + 1] for exam_n in exam_numbers])
+                best_score = float(max([mean_exam_score, applicant[-2]]))
+                dep_applicants.append([applicant[0], best_score])
+
             dep_applicants = sorted(dep_applicants, key=lambda x: (-x[1], x[0]))[:students_needed]
             departments_lists[n].extend(dep_applicants)
             accepted_students.extend([appl[0] for appl in dep_applicants])
@@ -40,8 +46,7 @@ class TestAdmissionProcedure(StageTest):
     @staticmethod
     def get_admission_lists(max_students):
         applicants = application_list.strip().split('\n')
-        departments = {'Mathematics': [2], 'Physics': [0, 2],
-                       'Biotech': [1, 0], 'Chemistry': [1],
+        departments = {'Mathematics': [2], 'Physics': [0, 2], 'Biotech': [1, 0], 'Chemistry': [1],
                        'Engineering': [3, 2]}
         exams = [departments[dep] for dep in sorted(departments)]
         departments = sorted(departments)
@@ -76,7 +81,6 @@ class TestAdmissionProcedure(StageTest):
 
             if not output_applicants:
                 raise WrongAnswer("The file for the {0} department is empty.".format(department_name))
-
             output_applicants = output_applicants.strip().split('\n')
             output_applicants = [line for line in output_applicants if line]
             correct_applicants = admission_lists[i]
